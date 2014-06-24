@@ -112,6 +112,7 @@ var FRAME = ( function () {
 					for ( var i = 0, l = active.length; i < l; i ++ ) {
 
 						var element = active[ i ];
+						var polled = vr.pollState(vrstate);
 						element.module.update( ( time - element.start ) / element.duration );
 
 					}

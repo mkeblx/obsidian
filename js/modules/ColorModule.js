@@ -29,9 +29,10 @@ var ColorModule = function () {
 	};
 
 	this.update = function ( t ) {
+		var rot = vrstate.hmd.rotation;
+		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);
 
-		renderer.render( scene, camera );
-
+		effect.render(scene, camera);
 	};
 
 };

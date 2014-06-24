@@ -110,7 +110,7 @@ var Scene5Module = function () {
 	
 	sphere.add( new THREE.Mesh( new THREE.SphereGeometry( 20, 2, 2 ), material ) );	
 	sphere.add( new THREE.Mesh( new THREE.IcosahedronGeometry( 20, 0 ), material ) );
-	sphere.add( new THREE.Mesh( new THREE.CubeGeometry( 20, 20, 20 ), material ) );
+	sphere.add( new THREE.Mesh( new THREE.BoxGeometry( 20, 20, 20 ), material ) );
 	sphere.add( new THREE.Mesh( new THREE.OctahedronGeometry( 20, 0 ), material ) );
 	sphere.add( new THREE.Mesh( new THREE.IcosahedronGeometry( 20, 1 ), material ) );
 	sphere.add( new THREE.Mesh( new THREE.TetrahedronGeometry( 20, 0 ), material ) );
@@ -183,8 +183,10 @@ var Scene5Module = function () {
 
 		}
 		
-		renderer.render( scene, camera );
+		var rot = vrstate.hmd.rotation;
+		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);		
 
+		effect.render(scene, camera);
 	};
 
 };

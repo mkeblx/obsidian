@@ -78,9 +78,11 @@ var SceneModule = function () {
 			mesh.scale.set( scale, scale, scale );
 			
 		}
-		
-		renderer.render( scene, camera );
 
+		var rot = vrstate.hmd.rotation;
+		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);		
+
+		effect.render(scene, camera);
 	};
 
 };
