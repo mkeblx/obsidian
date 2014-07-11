@@ -14,14 +14,14 @@ var WebGLRendererModule = function () {
 
 	var resize = function () {
 
-		renderer.setSize(
+		/*renderer.setSize(
 			width * ( window.innerWidth / width ),
 			height * ( window.innerWidth / width )
-		);
+		);*/
 
 		renderer.domElement.style.position = 'absolute';
 		renderer.domElement.style.left = '0px';
-		renderer.domElement.style.top = ( ( window.innerHeight - ( renderer.domElement.height / renderer.devicePixelRatio ) ) / 2 ) + 'px';
+		renderer.domElement.style.top = '0px';//( ( window.innerHeight - ( renderer.domElement.height / renderer.devicePixelRatio ) ) / 2 ) + 'px';
 
 	};
 
@@ -51,6 +51,8 @@ var WebGLRendererModule = function () {
 		if ( parameters.dom !== null ) {
 
 			parameters.dom.appendChild( renderer.domElement );
+			renderer.domElement.style.width = '100%';
+			renderer.domElement.style.height = '100%';
 			parameters.dom = null; // TODO: Another hack
 
 		}
