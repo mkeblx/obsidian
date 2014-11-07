@@ -13,8 +13,10 @@ var Scene3Module = function () {
 	var height = renderer.domElement.height;
 
 	var camera = new THREE.PerspectiveCamera( 60, width / height, 1, 1000 );
+	this.camera = camera;
 
 	var scene = new THREE.Scene();
+	this.scene = scene;
 
 	var light1 = new THREE.PointLight( 0xff8844, 5, 300 );
 	scene.add( light1 );
@@ -112,7 +114,7 @@ var Scene3Module = function () {
 		camera.position.multiplyScalar( t );
 		camera.position.add( startPosition );
 		camera.position.x += Math.max( 0, t - 0.495 ) * 500;
-		camera.lookAt( scene.position );
+		//camera.lookAt( scene.position );
 		
 		sphere1.position.z = t * 700 - 710;
 		sphere1.rotation.x = t * 12;
@@ -152,12 +154,9 @@ var Scene3Module = function () {
 			mesh.rotation.x = i + t * 6;
 			mesh.rotation.y = i + t * 4;
 			
-		}
+		}	
 
-		var rot = vrstate.hmd.rotation;
-		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);		
-
-		effect.render(scene, camera);
+		render( scene, camera );
 	};
 
 };

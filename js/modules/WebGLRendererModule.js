@@ -4,8 +4,8 @@ var WebGLRendererModule = function () {
 
 	this.parameters.input = {
 
-		width: 800,
-		height: 600,
+		width: 1920,
+		height: 1080,
 		dom: null
 
 	};
@@ -18,10 +18,6 @@ var WebGLRendererModule = function () {
 			width * ( window.innerWidth / width ),
 			height * ( window.innerWidth / width )
 		);*/
-
-		renderer.domElement.style.position = 'absolute';
-		renderer.domElement.style.left = '0px';
-		renderer.domElement.style.top = '0px';//( ( window.innerHeight - ( renderer.domElement.height / renderer.devicePixelRatio ) ) / 2 ) + 'px';
 
 	};
 
@@ -38,21 +34,17 @@ var WebGLRendererModule = function () {
 			antialias: true
 		});
 
-		var DK1 = [1280, 800];
-		var DK2 = [1920, 1080];
+		renderer.setSize(window.innerWidth, window.innerHeight);
 
-		var HMD = DK1;
 
-		effect = new THREE.OculusRiftEffect(renderer, {
-			worldFactor: 1,
-			renderScale: 1.7 } );
-		effect.setSize(HMD[0],HMD[1]);
+		effect = new THREE.VREffect(renderer);
+		this.effect = effect;
 
 		if ( parameters.dom !== null ) {
 
 			parameters.dom.appendChild( renderer.domElement );
-			renderer.domElement.style.width = '100%';
-			renderer.domElement.style.height = '100%';
+			//renderer.domElement.style.width = '100%';
+			//renderer.domElement.style.height = '100%';
 			parameters.dom = null; // TODO: Another hack
 
 		}

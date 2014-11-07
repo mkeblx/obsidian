@@ -14,6 +14,7 @@ var ColorModule = function () {
 	this.init = function ( parameters ) {
 
 		camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 1 );
+		this.camera = camera;
 
 		material = new THREE.MeshBasicMaterial( {
 			color: parameters.color,
@@ -22,6 +23,7 @@ var ColorModule = function () {
 		} );
 
 		scene = new THREE.Scene();
+		this.scene = scene;
 
 		var object = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2 ), material );
 		scene.add( object );
@@ -29,10 +31,8 @@ var ColorModule = function () {
 	};
 
 	this.update = function ( t ) {
-		var rot = vrstate.hmd.rotation;
-		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);
 
-		effect.render(scene, camera);
+		render( scene, camera );
 	};
 
 };

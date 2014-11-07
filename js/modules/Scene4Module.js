@@ -16,8 +16,10 @@ var Scene4Module = function () {
 	camera.up.y = 0.5;
 	camera.up.x = -1;
 	camera.up.normalize();
+	this.camera = camera;
 
 	var scene = new THREE.Scene();
+	this.scene = scene;
 
 	var light = new THREE.PointLight( 0xff0000, 10, 300 );
 	scene.add( light );
@@ -103,7 +105,7 @@ var Scene4Module = function () {
 		camera.position.copy( deltaPosition );
 		camera.position.multiplyScalar( t );
 		camera.position.add( startPosition );
-		camera.lookAt( scene.position );
+		//camera.lookAt( scene.position );
 		
 		if ( t > 0.44 ) camera.position.z += 600;
 		
@@ -145,10 +147,8 @@ var Scene4Module = function () {
 		
 		sphere.scale.x = sphere.scale.y = sphere.scale.z = t * 18 + 0.2;
 
-		var rot = vrstate.hmd.rotation;
-		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);		
 
-		effect.render(scene, camera);
+		render( scene, camera );
 	};
 
 };

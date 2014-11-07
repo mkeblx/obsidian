@@ -14,8 +14,10 @@ var TextModule = function () {
 	var height = renderer.domElement.height;
 
 	var camera = new THREE.PerspectiveCamera( 60, width / height, 1, 1000 );
+	this.camera = camera;
 
 	var scene = new THREE.Scene();
+	this.scene = scene;
 
 	var texts = {};
 	var currentText = null;
@@ -96,10 +98,9 @@ var TextModule = function () {
 		camera.position.add( startPosition );
 		camera.lookAt( scene.position );
 
-		var rot = vrstate.hmd.rotation;
-		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);
+		render( scene, camera );
 
-		effect.render(scene, camera);
+		//effect.render( scene, camera );
 	};
 
 };

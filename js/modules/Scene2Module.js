@@ -18,9 +18,11 @@ var Scene2Module = function () {
 	camera.up.y = 0.5;
 	camera.up.x = -1;
 	camera.up.normalize();
+	this.camera = camera;
 	var cameraTarget = new THREE.Vector3();
 
 	var scene = new THREE.Scene();
+	this.scene = scene;
 
 	var light1 = new THREE.PointLight( 0xff8844, 5, 300 );
 	scene.add( light1 );
@@ -176,12 +178,10 @@ var Scene2Module = function () {
 		cameraTarget.multiplyScalar( t );
 		cameraTarget.add( startPositionTarget );
 
-		camera.lookAt( cameraTarget );
+		//camera.lookAt( cameraTarget );
 
-		var rot = vrstate.hmd.rotation;
-		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);
 
-		effect.render(scene, camera);
+		render( scene, camera );
 	};
 
 };

@@ -16,8 +16,10 @@ var Scene5Module = function () {
 	camera.up.y = 0.5;
 	camera.up.x = -1;
 	camera.up.normalize();
+	this.camera = camera;
 
 	var scene = new THREE.Scene();
+	this.scene = scene;
 
 	var light = new THREE.PointLight( 0xff0000, 5, 300 );
 	scene.add( light );
@@ -158,7 +160,7 @@ var Scene5Module = function () {
 		camera.position.copy( deltaPosition );
 		camera.position.multiplyScalar( t );
 		camera.position.add( startPosition );
-		camera.lookAt( sphere.position );
+		//camera.lookAt( sphere.position );
 		
 		group.position.z = sphere.position.z;
 		group.rotation.z = t * 4;
@@ -182,11 +184,8 @@ var Scene5Module = function () {
 			mesh.scale.x = mesh.scale.y = mesh.scale.z = scale;
 
 		}
-		
-		var rot = vrstate.hmd.rotation;
-		camera.quaternion.set(rot[0], rot[1], rot[2], rot[3]);		
 
-		effect.render(scene, camera);
+		render( scene, camera );
 	};
 
 };
