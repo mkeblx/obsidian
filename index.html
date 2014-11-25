@@ -5,6 +5,10 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<title>obsidian by xplsv</title>
 		<style>
+			html, * {
+				box-sizing: border-box;
+			}
+
 			body {
 				background-color: #000;
 				color: #888;
@@ -50,6 +54,7 @@
 				left: calc(50% - 180px);
 				top: calc(50% - 150px);
 				text-align: center;
+				background-color: #000;
 			}
 		</style>
 	</head>
@@ -219,12 +224,37 @@
 
 			};
 
+			window.addEventListener('keydown', function(e){
+				switch (e.keyCode) {
+					case 82: // R
+						if (controls) controls.zeroSensor();
+						break;
+					case 70: // F
+						effect.setFullScreen(true);
+						break;
+					case 219: // [
+						effect.setRenderScale(effect.getRenderScale()*1/1.1);
+						break;
+					case 221: // ]
+						effect.setRenderScale(effect.getRenderScale()*1.1);
+						break;
+				}
+			}, false);
+
 			var render = function ( scene, camera ) {
 
-				var vrState = controls.getVRState();
-				if ( vrState ) {
-					camera.quaternion.fromArray( vrState.hmd.rotation );
+				var vrState = controls.getState();
+
+				var s = 5;
+
+				if (vrState) {
+					var vrPos = vrState.position;
+					var pos = new THREE.Vector3().copy(vrPos).multiplyScalar(s);
+
+					camera.position.copy(pos);
 				}
+
+				controls.update( camera );
 
 				effect.render( scene, camera );
 			};

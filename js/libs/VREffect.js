@@ -21,19 +21,27 @@
  * https://drive.google.com/folderview?id=0BzudLt22BqGRbW9WTHMtOWMzNjQ&usp=sharing#list
  *
  */
-THREE.VREffect = function ( renderer, done ) {
+THREE.VREffect = function ( renderer, done, config ) {
+
+	var cameraLeft = new THREE.PerspectiveCamera();
+	var cameraRight = new THREE.PerspectiveCamera();
+
 	this._renderer = renderer;
-	this._renderScale = 1;
+	this._renderScale = 1.1;
 
 	this._init = function() {
 		var self = this;
 		if ( !navigator.getVRDevices ) {
+			if ( config ) {
+				setupConfig( config );
+				return;
+			}
+
 			if ( done ) {
 				done("Your browser is not VR Ready");
 			}
 			return;
 		}
-
 		navigator.getVRDevices().then( gotVRDevices );
 
 		function gotVRDevices( devices ) {
@@ -47,15 +55,38 @@ THREE.VREffect = function ( renderer, done ) {
 					self.rightEyeTranslation = vrHMD.getEyeTranslation( "right" );
 					self.leftEyeFOV = vrHMD.getRecommendedEyeFieldOfView( "left" );
 					self.rightEyeFOV = vrHMD.getRecommendedEyeFieldOfView( "right" );
+
 					break; // We keep the first we encounter
 				}
 			}
 			if ( done ) {
 				if ( !vrHMD ) {
-				 error = 'HMD not available';
+					error = 'HMD not available';
 				}
 				done( error );
 			}
+		}
+
+		function setupConfig( config ) {
+			self.stereo = config.stereo || true;
+			
+			var separation = 0.032;
+
+			self.leftEyeTranslation = { x: -separation };
+			self.rightEyeTranslation = { x: separation };
+
+			self.leftEyeFOV = {
+				downDegrees: 50,
+				leftDegrees: 47,
+				rightDegrees: 47,
+				upDegrees: 53
+			};
+			self.rightEyeFOV = {
+				downDegrees: 53,
+				leftDegrees: 47,
+				rightDegrees: 47,
+				upDegrees: 53
+			};
 		}
 	};
 
@@ -66,7 +97,7 @@ THREE.VREffect = function ( renderer, done ) {
 		var vrHMD = this._vrHMD;
 		renderer.enableScissorTest( false );
 		// VR render mode if HMD is available
-		if ( vrHMD ) {
+		if ( vrHMD || this.stereo ) {
 			this.renderStereo.apply( this, arguments );
 			return;
 		}
@@ -85,32 +116,29 @@ THREE.VREffect = function ( renderer, done ) {
 	};
 
 	this.renderStereo = function( scene, camera, renderTarget, forceClear ) {
-		var cameraLeft;
-		var cameraRight;
+
 		var leftEyeTranslation = this.leftEyeTranslation;
 		var rightEyeTranslation = this.rightEyeTranslation;
 		var renderer = this._renderer;
 		var rendererWidth = renderer.domElement.width / renderer.devicePixelRatio;
 		var rendererHeight = renderer.domElement.height / renderer.devicePixelRatio;
 		var eyeDivisionLine = rendererWidth / 2;
+
 		renderer.enableScissorTest( true );
 		renderer.clear();
 
-		// Grab camera matrix from user.
-		// This is interpreted as the head base.
-		if ( camera.matrixAutoUpdate ) {
-			camera.updateMatrix();
+		if ( camera.parent === undefined ) {
+			camera.updateMatrixWorld();
 		}
-		var eyeWorldMatrix = camera.matrixWorld.clone();
 
-		cameraLeft = camera.clone();
-		cameraRight = camera.clone();
-		cameraLeft.projectionMatrix = this.FovToProjection( this.leftEyeFOV );
-		cameraRight.projectionMatrix = this.FovToProjection( this.rightEyeFOV );
-		cameraLeft.position.add(new THREE.Vector3(
-			leftEyeTranslation.x, leftEyeTranslation.y, leftEyeTranslation.z) );
-		cameraRight.position.add(new THREE.Vector3(
-			rightEyeTranslation.x, rightEyeTranslation.y, rightEyeTranslation.z) );
+		cameraLeft.projectionMatrix = this.FovToProjection( this.leftEyeFOV, true, camera.near, camera.far );
+		cameraRight.projectionMatrix = this.FovToProjection( this.rightEyeFOV, true, camera.near, camera.far );
+
+		camera.matrixWorld.decompose( cameraLeft.position, cameraLeft.quaternion, cameraLeft.scale );
+		camera.matrixWorld.decompose( cameraRight.position, cameraRight.quaternion, cameraRight.scale );
+
+		cameraLeft.translateX( leftEyeTranslation.x );
+		cameraRight.translateX( rightEyeTranslation.x );
 
 		// render left eye
 		renderer.setViewport( 0, 0, eyeDivisionLine, rendererHeight );
@@ -122,6 +150,7 @@ THREE.VREffect = function ( renderer, done ) {
 		renderer.setScissor( eyeDivisionLine, 0, eyeDivisionLine, rendererHeight );
 		renderer.render( scene, cameraRight );
 
+		renderer.enableScissorTest( false );
 	};
 
 	this.setFullScreen = function( enable ) {
@@ -149,7 +178,7 @@ THREE.VREffect = function ( renderer, done ) {
 			height: renderer.domElement.height
 		};
 
-		renderer.setSize( 1920*this._renderScale, 1080*this._renderScale, false );
+		this.setRenderScale( this._renderScale );
 		this.startFullscreen();
 	};
 
@@ -171,6 +200,18 @@ THREE.VREffect = function ( renderer, done ) {
 			canvas.mozRequestFullScreen( { vrDisplay: vrHMD } );
 		} else {
 			canvas.webkitRequestFullscreen( { vrDisplay: vrHMD } );
+		}
+	};
+
+	this.getTimewarp = function() {
+		if ( this._vrHMD && this._vrHMD.getTimewarp ) {
+			this._vrHMD.getTimewarp();
+		}
+	};
+
+	this.setTimewarp = function( val ) {
+		if ( this._vrHMD && this._vrHMD.setTimewarp ) {
+			this._vrHMD.setTimewarp( val );
 		}
 	};
 
@@ -230,11 +271,13 @@ THREE.VREffect = function ( renderer, done ) {
 
 	this.FovToProjection = function( fov, rightHanded /* = true */, zNear /* = 0.01 */, zFar /* = 10000.0 */ )
 	{
+		var DEG2RAD = Math.PI / 180.0;
+
 		var fovPort = {
-			upTan: Math.tan(fov.upDegrees * Math.PI / 180.0),
-			downTan: Math.tan(fov.downDegrees * Math.PI / 180.0),
-			leftTan: Math.tan(fov.leftDegrees * Math.PI / 180.0),
-			rightTan: Math.tan(fov.rightDegrees * Math.PI / 180.0)
+			upTan: Math.tan(fov.upDegrees * DEG2RAD),
+			downTan: Math.tan(fov.downDegrees * DEG2RAD),
+			leftTan: Math.tan(fov.leftDegrees * DEG2RAD),
+			rightTan: Math.tan(fov.rightDegrees * DEG2RAD)
 		};
 		return this.FovPortToProjection(fovPort, rightHanded, zNear, zFar);
 	};

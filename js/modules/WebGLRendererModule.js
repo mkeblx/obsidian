@@ -28,7 +28,6 @@ var WebGLRendererModule = function () {
 
 		//renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } ); // TODO: Remove this nasty global
 		renderer = new THREE.WebGLRenderer({
-			devicePixelRatio: 1,
 			alpha: false,
 			clearColor: 0x000000,
 			antialias: true
